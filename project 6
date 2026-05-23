@@ -1,0 +1,88 @@
+##Title and information
+#Project 6: YouTube Video Trend Analyzer
+#internship project on data science learning Categorical data analysis
+#Bar and pie chart visualization Digital media analytics Data storytelling
+
+#1: Setup Environment
+# Install required libraries
+!pip install pandas numpy matplotlib seaborn plotly
+
+#2: Import Libraries
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+import plotly.express as px
+
+#3:Load Dataset
+#upload YouTube dataset (youtube_data.csv) into Colab
+from google.colab import files
+uploaded = files.upload()
+
+df = pd.read_csv("youtube_data.csv")
+df.head()
+
+#4: Explore Data
+print(df.info())
+print(df.describe())
+print(df.isnull().sum())
+df.sample(5)
+
+#5: Clean Data
+# Drop duplicates
+df = df.drop_duplicates()
+
+# Fill missing values (example: fill category with 'Unknown')
+df['Category'] = df['Category'].fillna('Unknown')
+
+# Convert publish date if available
+df['Publish_Date'] = pd.to_datetime(df['Publish_Date'], errors='coerce')
+
+#6: Analyze Video Performance
+# Top categories by views
+top_categories = df.groupby('Category')['Views'].sum().sort_values(ascending=False).head(10)
+plt.figure(figsize=(10,5))
+sns.barplot(x=top_categories.index, y=top_categories.values, palette="viridis")
+plt.title("Top 10 Video Categories by Views")
+plt.xticks(rotation=45)
+plt.show()
+
+# Engagement ratio (likes + comments / views)
+df['Engagement_Ratio'] = (df['Likes'] + df['Comments']) / df['Views']
+engagement = df.groupby('Category')['Engagement_Ratio'].mean().sort_values(ascending=False).head(10)
+plt.figure(figsize=(10,5))
+sns.barplot(x=engagement.index, y=engagement.values, palette="coolwarm")
+plt.title("Top Categories by Engagement Ratio")
+plt.xticks(rotation=45)
+plt.show()
+
+#7: Trends Over Time
+df['Year'] = df['Publish_Date'].dt.year
+yearly_views = df.groupby('Year')['Views'].sum()
+
+plt.figure(figsize=(10,5))
+sns.lineplot(x=yearly_views.index, y=yearly_views.values, marker="o")
+plt.title("YouTube Views Trend Over Years")
+plt.show()
+
+#8: Advanced Insights
+# Correlation heatmap
+plt.figure(figsize=(8,6))
+sns.heatmap(df[['Views','Likes','Comments','Engagement_Ratio']].corr(), annot=True, cmap="Blues")
+plt.title("Correlation Between Metrics")
+plt.show()
+
+# Interactive scatter plot
+fig = px.scatter(df, x="Views", y="Likes", color="Category",
+                 size="Comments", hover_data=['Title'],
+                 title="Views vs Likes by Category")
+fig.show()
+
+# 9: Storytelling with Insights
+#Which categories dominate views? (e.g., Music, Gaming, Education).
+
+#Which categories drive engagement? (likes/comments relative to views).
+
+#How trends evolve over time? (growth in views, seasonal spikes).
+
+#Correlation between metrics (likes and comments strongly tied to views).
