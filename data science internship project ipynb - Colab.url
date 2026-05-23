@@ -1,2 +1,88 @@
-[InternetShortcut]
-URL=https://colab.research.google.com/drive/1el-J3dWgmS-stOoYODez49pAqM8m57-i#scrollTo=jwqFvnmSNn_K&uniqifier=1
+##Title and information
+#PROJECT 3:  Netflix User Behavior Analysis
+#internship project on data science learning Exploratory Data Analysis (EDA)
+#Data visualization using Seaborn and Matplotlib Pattern detection Correlation analysis
+
+#1: Setup Environment
+# Install required libraries (if not already installed)
+!pip install pandas numpy matplotlib seaborn plotly
+
+
+#2: Import Libraries
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+import plotly.express as px
+
+
+#3: Load Dataset
+from google.colab import files
+uploaded = files.upload()   # Upload your Netflix dataset
+
+# Load into DataFrame
+df = pd.read_csv("netflix_data.csv")
+df.head()
+
+#4: Explore Data
+# Basic info
+print(df.info())
+print(df.describe())
+
+# Check missing values
+print(df.isnull().sum())
+
+# Sample records
+df.sample(5)
+
+#5: Clean Data
+# Drop duplicates
+df = df.drop_duplicates()
+
+# Fill missing values (example: fill genre with 'Unknown')
+df['Genre'] = df['Genre'].fillna('Unknown')
+
+# Convert date column if available
+df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
+
+#6: Analyze Viewer Preferences
+# Top genres watched
+top_genres = df['Genre'].value_counts().head(10)
+plt.figure(figsize=(10,5))
+sns.barplot(x=top_genres.index, y=top_genres.values, palette="viridis")
+plt.title("Top 10 Genres Watched on Netflix")
+plt.xticks(rotation=45)
+plt.show()
+
+# Viewing trends over time
+df['Year'] = df['Date'].dt.year
+yearly_trend = df['Year'].value_counts().sort_index()
+plt.figure(figsize=(10,5))
+sns.lineplot(x=yearly_trend.index, y=yearly_trend.values, marker="o")
+plt.title("Viewing Trends Over Years")
+plt.show()
+
+#7: Advanced Insights
+# Average watch duration by genre
+if 'Duration' in df.columns:
+    genre_duration = df.groupby('Genre')['Duration'].mean().sort_values(ascending=False)
+    plt.figure(figsize=(10,5))
+    sns.barplot(x=genre_duration.index, y=genre_duration.values, palette="coolwarm")
+    plt.title("Average Watch Duration by Genre")
+    plt.xticks(rotation=45)
+    plt.show()
+
+# Interactive visualization with Plotly
+fig = px.histogram(df, x="Genre", color="Genre", title="Distribution of Genres Watched")
+fig.show()
+
+#8: Storytelling with Insights
+#You can now interpret:
+
+#Which genres dominate user preferences?
+
+#How viewing habits change over time (seasonality, yearly trends)?
+
+#Do users prefer shorter or longer content?
+
+#Regional or demographic differences (if your dataset includes them)?
